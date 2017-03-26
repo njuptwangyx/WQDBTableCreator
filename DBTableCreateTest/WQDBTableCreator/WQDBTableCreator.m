@@ -10,13 +10,11 @@
 
 @implementation WQDBTableCreator
 
-//更新表
-+ (BOOL)updateTableForClass:(Class)cls tableName:(NSString *)tableName inDatabase:(FMDatabase *)db {
++ (BOOL)createOrUpdateTableFromClass:(Class)cls tableName:(NSString *)tableName inDatabase:(FMDatabase *)db {
     if (!cls || !db) {
         return NO;
     }
     
-    //传入的表名为空，就用类名做为表名
     if (!tableName || tableName.length == 0) {
         NSString *fullName = NSStringFromClass(cls);
         if ([fullName rangeOfString:@"."].location != NSNotFound) {
@@ -26,45 +24,24 @@
         }
     }
     
-    tableName = [tableName lowercaseString];
-    
     BOOL suc = YES;
     
     if ([self tableExists:tableName inDatabase:db]) {
-        //表存在，检查是否需要更新
-        NSArray *ivars = [self ivarListForClass:cls];
-        NSArray *columns = [self columnsForTable:tableName inDatabase:db];
-        if (ivars.count > columns.count) {
-            //类的变量个数和已存在列的个数不一样，说明要更新
-            [db open];
-            [db beginTransaction];
-            
-            for (NSInteger i = columns.count; i < ivars.count; i++) {
-                WQClassIvarInfo *info = ivars[i];
-                NSString *sql = [NSString stringWithFormat:@"alter table %@ add column %@ %@", tableName, info.dbName, info.dbType];
-                suc = [db executeUpdate:sql];
-                
-                NSLog(@"%@", sql);
-            }
-            
-            [db commit];
-            [db close];
-        }
+        suc = [self updateTableFromClass:cls tableName:tableName inDatabase:db];
     } else {
-        //表不存在，创建表
-        suc = [self createTableForClass:cls tableName:tableName inDatabase:db];
+        suc = [self createTableFromClass:cls tableName:tableName inDatabase:db];
     }
     
     return suc;
 }
 
-//创建表
-+ (BOOL)createTableForClass:(Class)cls tableName:(NSString *)tableName inDatabase:(FMDatabase *)db {
+//Create table.
++ (BOOL)createTableFromClass:(Class)cls tableName:(NSString *)tableName inDatabase:(FMDatabase *)db {
     NSMutableString *sql = [NSMutableString string];
-    [sql appendFormat:@"create table if not exists %@ ", tableName];
+    [sql appendFormat:@"create table if not exists %@", tableName];
     [sql appendString:@"("];
     
-    NSArray *ivars = [self ivarListForClass:cls];
+    NSArray *ivars = [self ivarListOfClass:cls];
     [ivars enumerateObjectsUsingBlock:^(WQClassIvarInfo * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         if (idx > 0) {
             [sql appendString:@","];
@@ -85,10 +62,38 @@
     [db commit];
     [db close];
     
+    NSLog(@"sql:%@", sql);
+    
     return suc;
 }
 
-//判断表在数据库里是否存在
+//Update table.
++ (BOOL)updateTableFromClass:(Class)cls tableName:(NSString *)tableName inDatabase:(FMDatabase *)db {
+    BOOL suc = YES;
+    
+    NSArray *ivars = [self ivarListOfClass:cls];
+    NSArray *columns = [self columnsOfTable:tableName inDatabase:db];
+    if (ivars.count > columns.count) {
+        //If new fileds come, then update table.
+        [db open];
+        [db beginTransaction];
+        
+        for (NSInteger i = columns.count; i < ivars.count; i++) {
+            WQClassIvarInfo *info = ivars[i];
+            NSString *sql = [NSString stringWithFormat:@"alter table %@ add column %@ %@", tableName, info.dbName, info.dbType];
+            suc = [db executeUpdate:sql];
+            
+            NSLog(@"sql:%@", sql);
+        }
+        
+        [db commit];
+        [db close];
+    }
+    
+    return suc;
+}
+
+//Check if table exists in database.
 + (BOOL)tableExists:(NSString *)tableName inDatabase:(FMDatabase *)db {
     [db open];
     
@@ -101,8 +106,8 @@
     return exist;
 }
 
-//获取表的所有列
-+ (NSArray *)columnsForTable:(NSString *)tableName inDatabase:(FMDatabase *)db {
+//Get all columns of table.
++ (NSArray *)columnsOfTable:(NSString *)tableName inDatabase:(FMDatabase *)db {
     NSMutableArray *columns = [NSMutableArray new];
     
     [db open];
@@ -123,17 +128,17 @@
 }
 
 
-//获取类的所有成员变量，包括@property的属性，支持的数据类型有：
-//int,long,BOOL,float,double,String,NSNumber,NSData,NSDate
-+ (NSArray *)ivarListForClass:(Class)cls {
-    //主键
+//Get variables and properties of class.
+//Supported data types: int,long,BOOL,float,double,String,NSNumber,NSData,NSDate
++ (NSArray *)ivarListOfClass:(Class)cls {
+    //primary key
     NSString *primaryKeyStr = nil;
     SEL primaryKeySel = @selector(primaryKey);
     if (class_getClassMethod(cls, primaryKeySel)) {
         IMP imp = [cls methodForSelector:primaryKeySel];
         primaryKeyStr = imp(cls, primaryKeySel);
     }
-    //忽略的字段
+    //ignored fields
     NSArray *ignoreIvars = nil;
     SEL ignoreIvarsSel = @selector(ignoreArray);
     if (class_getClassMethod(cls, ignoreIvarsSel)) {
@@ -160,7 +165,6 @@
     return ivarInfos;
 }
 
-//根据变量类型返回对应的数据库字段类型
 + (NSString *)dataBaseTypeWithEncodeName:(NSString *)encode {
     if ([encode isEqualToString:[NSString stringWithUTF8String:@encode(int)]]
         ||[encode isEqualToString:[NSString stringWithUTF8String:@encode(unsigned int)]]

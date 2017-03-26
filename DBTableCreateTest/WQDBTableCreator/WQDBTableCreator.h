@@ -13,16 +13,17 @@
 @interface WQDBTableCreator : NSObject
 
 /**
- 根据类创建或更新表。
- 如果表不存在，就创建表。
- 如果存在，检查是否有新增的字段，如果有，则更新表；如果没有，什么也不做。
+ Create or update table from 'Class' in designated database.
+ If table exists, check for new fields to update table or do nothing; otherwise create a table.
 
- @param cls 类，如果属性里面有"ID"，则默认做为主键。
- @param tableName 表名，如果为空，就用传入的类名作为表名
- @param db 数据库
+ @param cls Class, if the class contains property or variable named 'ID', the 'ID' will be designated as primary key. Of course you can customize primary key by methods of 'WQTableBaseModel'.
+ @param tableName Name of the table. If it is nil or a empty string, the class‘s name will be designated as table's name.
+ @param db database, 'FMDatabase' object.
+ 
+ @return 'YES' if successful; 'NO' if failure.
 
  */
-+ (BOOL)updateTableForClass:(Class)cls tableName:(NSString *)tableName inDatabase:(FMDatabase *)db;
++ (BOOL)createOrUpdateTableFromClass:(Class)cls tableName:(NSString *)tableName inDatabase:(FMDatabase *)db;
 
 @end
 
@@ -30,12 +31,11 @@
 
 
 /**
- 创建表的类可以继承这个基类，用于一些自定义需求。
+ Super class of model for customized requirements.
  */
 @interface WQTableBaseModel : NSObject
-+ (NSString *)primaryKey;//主键
-+ (NSArray *)ignoreArray;//忽略的字段
-//要修改和删除的列可以在这里扩展
++ (NSString *)primaryKey;//return the primary key.
++ (NSArray *)ignoreArray;//return ignored fields.
 @end
 
 
@@ -49,7 +49,7 @@
 @property (nonatomic, copy) NSString *typeEncode;
 @property (nonatomic, copy) NSString *dbName;
 @property (nonatomic, copy) NSString *dbType;
-@property (nonatomic, assign) BOOL isPrimaryKey;//是否主键
+@property (nonatomic, assign) BOOL isPrimaryKey;
 
 - (instancetype)initWithIvar:(Ivar)ivar;
 @end

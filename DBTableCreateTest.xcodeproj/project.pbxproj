@@ -20,6 +20,7 @@
 		B4B6332E1E851A940000D4EF /* FMDatabaseQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = B4B633271E851A940000D4EF /* FMDatabaseQueue.m */; };
 		B4B6332F1E851A940000D4EF /* FMResultSet.m in Sources */ = {isa = PBXBuildFile; fileRef = B4B6332A1E851A940000D4EF /* FMResultSet.m */; };
 		B4B633341E851E5A0000D4EF /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = B4B633331E851E5A0000D4EF /* libsqlite3.tbd */; };
+		B4D378981E87B8D700F2CC80 /* Student.m in Sources */ = {isa = PBXBuildFile; fileRef = B4D378971E87B8D600F2CC80 /* Student.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -47,6 +48,8 @@
 		B4B633291E851A940000D4EF /* FMResultSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMResultSet.h; sourceTree = "<group>"; };
 		B4B6332A1E851A940000D4EF /* FMResultSet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMResultSet.m; sourceTree = "<group>"; };
 		B4B633331E851E5A0000D4EF /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
+		B4D378961E87B8D600F2CC80 /* Student.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Student.h; sourceTree = "<group>"; };
+		B4D378971E87B8D600F2CC80 /* Student.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Student.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,6 +86,8 @@
 			children = (
 				B4B6331F1E851A940000D4EF /* fmdb */,
 				B4B6331B1E851A570000D4EF /* WQDBTableCreator */,
+				B4D378961E87B8D600F2CC80 /* Student.h */,
+				B4D378971E87B8D600F2CC80 /* Student.m */,
 				B4B633071E851A1D0000D4EF /* AppDelegate.h */,
 				B4B633081E851A1D0000D4EF /* AppDelegate.m */,
 				B4B6330A1E851A1D0000D4EF /* ViewController.h */,
@@ -217,6 +222,7 @@
 				B4B6332B1E851A940000D4EF /* FMDatabase.m in Sources */,
 				B4B6332D1E851A940000D4EF /* FMDatabasePool.m in Sources */,
 				B4B6332F1E851A940000D4EF /* FMResultSet.m in Sources */,
+				B4D378981E87B8D700F2CC80 /* Student.m in Sources */,
 				B4B6331E1E851A570000D4EF /* WQDBTableCreator.m in Sources */,
 				B4B6332C1E851A940000D4EF /* FMDatabaseAdditions.m in Sources */,
 			);
